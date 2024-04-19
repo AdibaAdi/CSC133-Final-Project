@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.view.MotionEvent;
 import android.view.View;
 import android.graphics.Point;
@@ -22,6 +23,8 @@ class GameMenu extends View {
     private Rect mEasyButton, mMediumButton, mHardButton;
     private SnakeActivity mSnakeActivity;
 
+    private int headingTop;
+
         public GameMenu(Context context, Bitmap background, Point size) {
             super(context);
             mSnakeActivity = (SnakeActivity) context;
@@ -29,25 +32,48 @@ class GameMenu extends View {
             mBackgroundBitmap = Bitmap.createScaledBitmap(background, size.x, size.y, false);
             mPaint = new Paint();
 
-        // Define button areas for difficulty selection
-        // For simplicity, these are just example rects, you should position and size them appropriately.
-        mEasyButton = new Rect(50, 100, 250, 200);
-        mMediumButton = new Rect(50, 300, 250, 400);
-        mHardButton = new Rect(50, 500, 250, 600);
-    }
+
+            // Calculate the position of the difficulty level heading and buttons
+            int left = size.x / 2; // Center of the screen horizontally
+            int top = size.y / 2; // Center of the screen vertically or wherever the buttons should start
+
+            // These values may need to be adjusted to fit the content and aesthetics
+            int buttonWidth = 200; // Width of each button
+            int buttonHeight = 100; // Height of each button
+            // Initialize headingTop here based on the provided size
+            headingTop = size.y / 2 - 150;
+            mPaint.setTextAlign(Paint.Align.CENTER); // Center text horizontally
+
+            // Define the button rectangles centered horizontally
+            mEasyButton = new Rect(left - buttonWidth / 2, top, left + buttonWidth / 2, top + buttonHeight);
+            mMediumButton = new Rect(left - buttonWidth / 2, top + buttonHeight + 20, left + buttonWidth / 2, top + buttonHeight * 2 + 20);
+            mHardButton = new Rect(left - buttonWidth / 2, top + buttonHeight * 2 + 40, left + buttonWidth / 2, top + buttonHeight * 3 + 40);
+        }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
+        // Get the current width and height of the view
+        int viewWidth = getWidth();
+        int viewHeight = getHeight();
+
         // Draw the background
         canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
         mPaint.setColor(Color.WHITE);
-        mPaint.setTextSize(50);
+        mPaint.setTextSize(60); // Adjust text size if necessary
+        mPaint.setTypeface(Typeface.DEFAULT_BOLD); // Set text to bold
+
+        // Adjust your drawing coordinates using viewWidth and viewHeight
+        // Draw the difficulty level heading
+        canvas.drawText("Difficulty Level", viewWidth / 2, headingTop, mPaint);
 
         // Draw buttons for difficulty levels
-        canvas.drawText("Easy", mEasyButton.left, mEasyButton.bottom, mPaint);
-        canvas.drawText("Medium", mMediumButton.left, mMediumButton.bottom, mPaint);
-        canvas.drawText("Hard", mHardButton.left, mHardButton.bottom, mPaint);
+        // Align the text to the center of the button
+        canvas.drawText("Easy", mEasyButton.centerX(), mEasyButton.centerY() + mPaint.getTextSize() / 3, mPaint);
+        canvas.drawText("Medium", mMediumButton.centerX(), mMediumButton.centerY() + mPaint.getTextSize() / 3, mPaint);
+        canvas.drawText("Hard", mHardButton.centerX(), mHardButton.centerY() + mPaint.getTextSize() / 3, mPaint);
     }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
