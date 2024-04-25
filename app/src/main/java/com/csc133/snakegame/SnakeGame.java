@@ -66,7 +66,20 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
 
-
+    public void setDifficulty(Difficulty difficulty) {
+        // Adjust game parameters based on difficulty
+        switch (difficulty) {
+            case EASY:
+                // Set parameters for easy difficulty
+                break;
+            case MEDIUM:
+                // Set parameters for medium difficulty
+                break;
+            case HARD:
+                // Set parameters for hard difficulty
+                break;
+        }
+    }
 
     // This is the constructor method that gets called
     // from SnakeActivity
