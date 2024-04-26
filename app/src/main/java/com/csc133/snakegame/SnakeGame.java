@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.app.Activity;
+import android.media.MediaPlayer;
 
 
 class SnakeGame extends SurfaceView implements Runnable, GameControls{
@@ -56,6 +57,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private Canvas mCanvas;
     private SurfaceHolder mSurfaceHolder;
     private Paint mPaint;
+    private MediaPlayer mediaPlayer;
+
 
     // A snake ssss
 //    private Snake mSnake;
@@ -124,6 +127,19 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
+
+
+            // MediaPlayer for background song
+            descriptor = assetManager.openFd("ali_rap.mp3");
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.prepare();
+
+            // Start playing the background song
+            mediaPlayer.setVolume(1.0f, 1.0f);
+            mediaPlayer.setLooping(true); // Optional: set the song to loop
+            mediaPlayer.start();
 
         } catch (IOException e) {
             // Error handling
@@ -236,7 +252,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
                     mScore += 1; // Increase the score
                 }
             });
-            mSP.play(mEat_ID, 1, 1, 0, 0, 1); // Play eating sound
+            mSP.play(mEat_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
 
         // Check if the snake has died
@@ -249,11 +265,15 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
                 }
             });
+<<<<<<< HEAD
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
             }
 
+=======
+            mSP.play(mCrashID, 0.2F, 0.2F, 0, 0, 1); // Play death sound
+>>>>>>> Dragon
         }
     }
 
