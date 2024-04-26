@@ -45,72 +45,43 @@ class Snake implements DrawableMovable{
 
 
     Snake(Context context, Point mr, int ss) {
-
         // Initialize our ArrayList
         segmentLocations = new ArrayList<>();
 
-        // Initialize the segment size and movement
-        // range from the passed in parameters
+        // Initialize the segment size and movement range from the passed in parameters
         mSegmentSize = ss;
         mMoveRange = mr;
+        double scaleFactor = 1.5; // The scale factor to increase the size by 1.5
 
-        // Create and scale the bitmaps
-        mBitmapHeadRight = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+        // Load the image from resources
+        mBitmapHeadRight = BitmapFactory.decodeResource(context.getResources(), R.drawable.head);
 
-        // Create 3 more versions of the head for different headings
-        mBitmapHeadLeft = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
+        // Scale the head bitmap
+        mBitmapHeadRight = Bitmap.createScaledBitmap(mBitmapHeadRight, (int)(mSegmentSize * scaleFactor), (int)(mSegmentSize * scaleFactor), false);
 
-        mBitmapHeadUp = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
-
-        mBitmapHeadDown = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.head);
-
-        // Modify the bitmaps to face the snake head
-        // in the correct direction
-        mBitmapHeadRight = Bitmap
-                .createScaledBitmap(mBitmapHeadRight,
-                        ss, ss, false);
-
-        // A matrix for scaling
+        // A matrix for scaling and rotating
         Matrix matrix = new Matrix();
+        // Use the matrix to flip the head for facing left
         matrix.preScale(-1, 1);
+        mBitmapHeadLeft = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
 
-        mBitmapHeadLeft = Bitmap
-                .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
-
-        // A matrix for rotating
+        // Reset the matrix and rotate for facing up
+        matrix.reset();
         matrix.preRotate(-90);
-        mBitmapHeadUp = Bitmap
-                .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+        mBitmapHeadUp = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
 
-        // Matrix operations are cumulative
-        // so rotate by 180 to face down
-        matrix.preRotate(180);
-        mBitmapHeadDown = Bitmap
-                .createBitmap(mBitmapHeadRight,
-                        0, 0, ss, ss, matrix, true);
+        // Reset the matrix and rotate for facing down (but facing the right side)
+        matrix.reset();
+        matrix.preRotate(90); // This is changed from 180 to 90 to face the right side
+        mBitmapHeadDown = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
 
-        // Create and scale the body
-        mBitmapBody = BitmapFactory
-                .decodeResource(context.getResources(),
-                        R.drawable.body);
-
-        mBitmapBody = Bitmap
-                .createScaledBitmap(mBitmapBody,
-                        ss, ss, false);
+        // Load and scale the body bitmap
+        mBitmapBody = BitmapFactory.decodeResource(context.getResources(), R.drawable.body);
+        mBitmapBody = Bitmap.createScaledBitmap(mBitmapBody, (int)(mSegmentSize * scaleFactor), (int)(mSegmentSize * scaleFactor), false);
 
         // The halfway point across the screen in pixels
         // Used to detect which side of screen was pressed
-        halfWayPoint = mr.x * ss / 2;
+        halfWayPoint = mr.x * mSegmentSize / 2;
     }
 
     @Override
@@ -120,6 +91,7 @@ class Snake implements DrawableMovable{
         segmentLocations.add(new Point(mMoveRange.x / 2, mMoveRange.y / 2)); // Start in middle
         heading = Heading.RIGHT; // Default direction
     }
+
 
     // Get the snake ready for a new game
     void reset(int w, int h) {
