@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 public class SnakeActivity extends Activity {
 
@@ -28,7 +27,9 @@ public class SnakeActivity extends Activity {
         gameMenu = new GameMenu(this, menuBackground, size); // Pass size to properly scale the background
 
         setContentView(gameMenu); // Set the game menu as the initial view
+
     }
+
 
     public void startGame(Difficulty difficulty) {
         FrameLayout gameLayout = new FrameLayout(this);

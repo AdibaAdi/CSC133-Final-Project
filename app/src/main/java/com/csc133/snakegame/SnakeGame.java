@@ -19,11 +19,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.app.Activity;
+import android.graphics.Rect;
 
 
-class SnakeGame extends SurfaceView implements Runnable, GameControls{
-
-
+class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
     private Activity mActivity;
 
@@ -37,7 +36,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private volatile boolean mPlaying = false;
     private volatile boolean mPaused = true;
     private PauseButtonHandler pauseButtonHandler;
-
 
     // for playing sound effects
     private SoundPool mSP;
@@ -56,15 +54,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private SurfaceHolder mSurfaceHolder;
     private Paint mPaint;
 
-    // A snake ssss
-//    private Snake mSnake;
-////    // And an apple
-//    private Apple mApple;
-
-
     // DrawableMovable interfaces for the snake and apple
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
+
 
     public void setDifficulty(Difficulty difficulty) {
         // Adjust game parameters based on difficulty
@@ -131,8 +124,9 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
         mApple = new Apple(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
         mSnake = new Snake(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        Obstacle obstacle = new Obstacle(100, 200, 50, Obstacle.ObstacleType.REGULAR);
+        boolean collision = obstacle.collidesWith(Rect rect);
     }
-
 
     public void setPauseButtonHandler(PauseButtonHandler handler) {
         this.pauseButtonHandler = handler;
@@ -145,7 +139,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mApple.reset();
 
         // Prepare the game objects for a new game
-        ((Apple)mApple).spawn(); // Note: spawn is specific to Apple
+        ((Apple) mApple).spawn(); // Note: spawn is specific to Apple
 
         // Reset the score
         mScore = 0;
@@ -159,15 +153,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         }
     }
 
-
-
     // Handles the game loop
     @Override
     public void run() {
         // Ensure newGame is called before game loop starts
         newGame();
         while (mPlaying) {
-            if(!mPaused) {
+            if (!mPaused) {
                 // Update 10 times a second
                 if (updateRequired()) {
                     update();
@@ -189,21 +181,18 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mPaused = false;
     }
 
-
     // Check to see if it is time for an update
     public boolean updateRequired() {
-
         // Run at 10 frames per second
         final long TARGET_FPS = 10;
         final long MILLIS_PER_SECOND = 1000;
 
         // Are we due to update the frame
-        if(mNextFrameTime <= System.currentTimeMillis()){
+        if (mNextFrameTime <= System.currentTimeMillis()) {
             // Tenth of a second has passed
 
             // Setup when the next update will be triggered
-            mNextFrameTime =System.currentTimeMillis()
-                    + MILLIS_PER_SECOND / TARGET_FPS;
+            mNextFrameTime = System.currentTimeMillis() + MILLIS_PER_SECOND / TARGET_FPS;
 
             // Return true so that the update and draw
             // methods are executed
@@ -213,18 +202,17 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         return false;
     }
 
-
     // Update all the game objects
     public void update() {
         mSnake.move(); // Move the snake
 
         // Check if the snake has eaten an apple
-        if (((Snake)mSnake).checkDinner(mApple.getLocation())) {
+        if (((Snake) mSnake).checkDinner(mApple.getLocation())) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // UI updates here
-                    ((Apple)mApple).spawn(); // Respawn the apple
+                    ((Apple) mApple).spawn(); // Respawn the apple
                     mScore += 1; // Increase the score
                 }
             });
@@ -232,20 +220,27 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         }
 
         // Check if the snake has died
-        if (((Snake)mSnake).detectDeath()) {
+        if (((Snake) mSnake).detectDeath()) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // Don't automatically start a new game. Just pause and show "Tap to Play".
                     mPaused = true;
-
                 }
             });
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
         }
+        if (Obstacle.collidesWith(Snake.getBoundingRect())) {
+            if (Obstacle.getType() == Obstacle.ObstacleType.BOOM) {
+                // Implement game over logic or reduce snake length
+                GameEnd(); // For example, if you have a method to handle game over
+                return; // Exit the collision detection loop
+            } else {
+                // Handle collision with regular obstacles as before
+                // ...
+            }
+        }
     }
-
-
 
     // Do all the drawing
     public void draw() {
@@ -290,7 +285,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         }
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
@@ -304,7 +298,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
                     return true;
                 } else {
                     // If the game is already playing, handle snake direction changes
-                    ((Snake)mSnake).switchHeading(motionEvent);
+                    ((Snake) mSnake).switchHeading(motionEvent);
                 }
                 break;
             default:
@@ -312,8 +306,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         }
         return true;
     }
-
-
 
     // Stop the thread
     public void pause() {
@@ -325,7 +317,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         }
     }
 
-
     // Start the thread
     public void resume() {
         newGame(); // Set up the initial game state
@@ -333,7 +324,4 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mThread = new Thread(this);
         mThread.start();
     }
-
-    // Called to start a new game
-
 }

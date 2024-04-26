@@ -23,7 +23,7 @@ class Apple implements DrawableMovable {
     private Bitmap mBitmapApple;
 
     /// Set up the apple in the constructor
-    Apple(Context context, Point sr, int s){
+    Apple(Context context, Point sr, int s) {
 
         // Make a note of the passed in spawn range
         mSpawnRange = sr;
@@ -40,6 +40,7 @@ class Apple implements DrawableMovable {
         // Resize the bitmap
         mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, s, s, false);
     }
+
 
     // This is called every time an apple is eaten
     public void spawn(){
