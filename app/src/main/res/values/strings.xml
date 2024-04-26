@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Snake Game</string>
     <string name="tap_to_play">Tap To Play!</string>
+    <string name="score_text">Score: %1$d</string>
 </resources>

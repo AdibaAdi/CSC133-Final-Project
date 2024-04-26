@@ -32,13 +32,14 @@ class Apple implements DrawableMovable {
         // Hide the apple off-screen until the game starts
         location.x = -10;
         location.y = -10;
-
+        int scaleFactor = 2;
 
         // Load the image to the bitmap
         mBitmapApple = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple);
 
         // Resize the bitmap
-        mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, s, s, false);
+        //mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, s, s, false);
+        mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, (int)(mSize * scaleFactor), (int)(mSize * scaleFactor), false);
     }
 
     // This is called every time an apple is eaten

@@ -37,6 +37,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private volatile boolean mPlaying = false;
     private volatile boolean mPaused = true;
     private PauseButtonHandler pauseButtonHandler;
+    private Difficulty mCurrentDifficulty; // To hold the current difficulty level
 
 
     // for playing sound effects
@@ -66,11 +67,31 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
 
+    private GameOverListener gameOverListener;
 
+    public void setGameOverListener(GameOverListener listener) {
+        gameOverListener = listener;
+    }
+
+
+    public void setDifficulty(Difficulty difficulty) {
+        // Adjust game parameters based on difficulty
+        switch (difficulty) {
+            case EASY:
+                // Set parameters for easy difficulty
+                break;
+            case MEDIUM:
+                // Set parameters for medium difficulty
+                break;
+            case HARD:
+                // Set parameters for hard difficulty
+                break;
+        }
+    }
 
     // This is the constructor method that gets called
     // from SnakeActivity
-    public SnakeGame(Context context, Point size) {
+    public SnakeGame(Context context, Point size, Difficulty difficulty) {
         super(context);
 
         if (context instanceof Activity) {
@@ -118,6 +139,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
         mApple = new Apple(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
         mSnake = new Snake(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mCurrentDifficulty = difficulty;
     }
 
 
@@ -144,9 +166,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         if (pauseButtonHandler != null) {
             pauseButtonHandler.resetPauseButton();
         }
+
     }
-
-
 
     // Handles the game loop
     @Override
@@ -229,6 +250,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
                 }
             });
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
+            if (gameOverListener != null) {
+                gameOverListener.onGameOver(mScore);
+            }
+
         }
     }
 
@@ -240,13 +265,24 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         if (mSurfaceHolder.getSurface().isValid()) {
             mCanvas = mSurfaceHolder.lockCanvas();
 
+            // Check if the mCanvas is null
+            if (mCanvas == null) {
+                return; // If mCanvas is null, exit the method to avoid NullPointerException
+            }
+
             // Draw the background first
             mCanvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
 
-            // Draw the names "Jacob & Adiba" in the top right corner
+            // Draw the names in the top right corner
             mPaint.setTextSize(40); // Smaller size for better screen fit
             mPaint.setColor(Color.WHITE);
             mPaint.setTypeface(gameFont);
+
+            // Draw the difficulty level below the score
+            String difficultyText = "Level: " + mCurrentDifficulty.name();
+            // Use the same text size as the score or adjust as needed
+            mPaint.setTextSize(60);
+            mCanvas.drawText(difficultyText, 20, 190, mPaint); // Position it below the score
 
             // Calculate the position for "Jacob & Adiba" to appear in the top right corner
             String names = "Group 5";
