@@ -109,7 +109,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
 
             // MediaPlayer for background song
-            descriptor = assetManager.openFd("CodeGuruRap.mp3");
+            descriptor = assetManager.openFd("ali_rap.mp3");
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
