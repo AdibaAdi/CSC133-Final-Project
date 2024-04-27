@@ -265,15 +265,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
                 }
             });
-<<<<<<< HEAD
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
             }
 
-=======
             mSP.play(mCrashID, 0.2F, 0.2F, 0, 0, 1); // Play death sound
->>>>>>> Dragon
         }
     }
 
