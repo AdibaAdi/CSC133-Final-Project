@@ -51,7 +51,7 @@ class Snake implements DrawableMovable{
         // Initialize the segment size and movement range from the passed in parameters
         mSegmentSize = ss;
         mMoveRange = mr;
-        double scaleFactor = 1.5; // The scale factor to increase the size by 1.5
+        double scaleFactor = 3; // The scale factor to increase the size by 1.5
 
         // Load the image from resources
         mBitmapHeadRight = BitmapFactory.decodeResource(context.getResources(), R.drawable.head);
