@@ -15,11 +15,13 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import java.io.IOException;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.app.Activity;
 
+import java.util.ArrayList;
 
 class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
@@ -42,7 +44,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
     // for playing sound effects
     private SoundPool mSP;
-    private int mEat_ID = -1;
+    private int mEat_Apple_ID = -1;
+    private int mEat_Coin_ID = -1;
+    private int mEat_Sword_ID = -1;
+
     private int mCrashID = -1;
 
     // The size in segments of the playable area
@@ -67,7 +72,18 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
 
+    private DrawableMovable mCoin;
+    private DrawableMovable mSword1;
+    private DrawableMovable mSword2;
+    private DrawableMovable mSword3;
+    private DrawableMovable mSword4;
+    private DrawableMovable mSword5;
+    private DrawableMovable[] mSwords;
+
+    private int blockSize;
+
     private GameOverListener gameOverListener;
+
 
     public void setGameOverListener(GameOverListener listener) {
         gameOverListener = listener;
@@ -98,7 +114,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
             mActivity = (Activity) context;
         }
 
-        int blockSize = size.x / NUM_BLOCKS_WIDE;
+        blockSize = size.x / NUM_BLOCKS_WIDE;
         mNumBlocksHigh = size.y / blockSize;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -120,7 +136,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
             AssetFileDescriptor descriptor;
 
             descriptor = assetManager.openFd("get_apple.ogg");
-            mEat_ID = mSP.load(descriptor, 0);
+            mEat_Apple_ID = mSP.load(descriptor, 0);
+
+            descriptor = assetManager.openFd("get_coin.ogg");
+            mEat_Coin_ID = mSP.load(descriptor, 0);
+
+            descriptor = assetManager.openFd("dragon_hurt.ogg");
+            mEat_Sword_ID = mSP.load(descriptor, 0);
 
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
@@ -136,9 +158,20 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap, size.x, size.y, false);
 
         gameFont = Typeface.createFromAsset(context.getAssets(), "fonts/press_start_2p.ttf");
+        
 
         mApple = new Apple(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
         mSnake = new Snake(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mCoin = new Coin(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mSword1 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mSword2 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mSword3 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mSword4 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mSword5 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+
+
+        mSwords = new DrawableMovable[]{mSword1, mSword2, mSword3, mSword4, mSword5};
+
         mCurrentDifficulty = difficulty;
     }
 
@@ -147,33 +180,45 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         this.pauseButtonHandler = handler;
     }
 
-    // Called to start a new game
     public void newGame() {
         // Reset the game objects
         mSnake.reset();
         mApple.reset();
-
-        // Prepare the game objects for a new game
-        ((Apple)mApple).spawn(); // Note: spawn is specific to Apple
-
-        // Reset the score
-        mScore = 0;
-
-        // Setup mNextFrameTime so an update can be triggered
-        mNextFrameTime = System.currentTimeMillis();
-
-        // Reset the pause button if the handler is set
-        if (pauseButtonHandler != null) {
-            pauseButtonHandler.resetPauseButton();
+        // Always spawn the apple
+        ((Apple)mApple).spawn(); // Respawn the apple
+    
+        // Check if the difficulty is medium
+        if (mCurrentDifficulty == Difficulty.MEDIUM) {
+            // Prepare the game objects for a new game
+            mCoin.reset(); // Reset the coin object
+            ((Coin)mCoin).spawn(); // Respawn the coin
+    
+            for (DrawableMovable sword : mSwords) {
+                sword.reset();
+                ((Sword)sword).spawn(); // Respawn the swords
+            }
         }
-
+        
+         // Reset the score
+         mScore = 0;
+    
+         // Setup mNextFrameTime so an update can be triggered
+         mNextFrameTime = System.currentTimeMillis();
+     
+         // Reset the pause button if the handler is set
+         if (pauseButtonHandler != null) {
+             pauseButtonHandler.resetPauseButton();
+         }
+     
     }
+    
 
     // Handles the game loop
     @Override
     public void run() {
         // Ensure newGame is called before game loop starts
         newGame();
+
         while (mPlaying) {
             if(!mPaused) {
                 // Update 10 times a second
@@ -227,7 +272,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mSnake.move(); // Move the snake
 
         // Check if the snake has eaten an apple
-        if (((Snake)mSnake).checkDinner(mApple.getLocation())) {
+        if (((Snake)mSnake).checkDinner(mApple.getLocation(), 1)) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -236,7 +281,33 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
                     mScore += 1; // Increase the score
                 }
             });
-            mSP.play(mEat_ID, 1, 1, 0, 0, 1); // Play eating sound
+            mSP.play(mEat_Apple_ID, 1, 1, 0, 0, 1); // Play eating sound
+        }
+        
+        if (((Snake)mSnake).checkDinner(mCoin.getLocation(), 2)) {
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // UI updates here
+                    ((Coin)mCoin).spawn(); // Respawn the coin
+                    mScore += 2; // Increase the score
+                }
+            });
+            mSP.play(mEat_Coin_ID, 1, 1, 0, 0, 1); // Play eating sound
+        }
+
+        for (DrawableMovable sword : mSwords) {
+            if (((Snake)mSnake).checkDinner(sword.getLocation(), -2)) {
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // UI updates here
+                        ((Sword)sword).spawn(); // Respawn the sword
+                        mScore -= 2; // Decrease the score
+                    }
+                });
+                mSP.play(mEat_Sword_ID, 1, 1, 0, 0, 1); // Play eating sound
+            }
         }
 
         // Check if the snake has died
@@ -297,6 +368,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
             // Draw the apple and the snake
             mApple.draw(mCanvas, mPaint);
+            mCoin.draw(mCanvas, mPaint);
+            for (DrawableMovable sword : mSwords) {
+                sword.draw(mCanvas, mPaint);
+            }
             mSnake.draw(mCanvas, mPaint);
 
             // If the game is paused, draw the "Tap to Play" message centered
@@ -351,10 +426,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
     // Start the thread
     public void resume() {
-        newGame(); // Set up the initial game state
         mPlaying = true;
         mThread = new Thread(this);
         mThread.start();
+        newGame(); // Set up the initial game state
     }
 
     // Called to start a new game

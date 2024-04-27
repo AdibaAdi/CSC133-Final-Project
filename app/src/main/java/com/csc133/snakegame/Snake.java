@@ -178,21 +178,21 @@ class Snake implements DrawableMovable{
         return dead;
     }
 
-    boolean checkDinner(Point l) {
+    boolean checkDinner(Point l, int num) {
         if (segmentLocations.isEmpty()) {
             // No head to check for dinner
             return false;
         }
-        //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
-        if (segmentLocations.get(0).x == l.x &&
-                segmentLocations.get(0).y == l.y) {
-
-            // Add a new Point to the list
-            // located off-screen.
-            // This is OK because on the next call to
-            // move it will take the position of
-            // the segment in front of it
-            segmentLocations.add(new Point(-10, -10));
+        if (segmentLocations.get(0).x == l.x && segmentLocations.get(0).y == l.y) {
+            if (num > 0) {
+                for (int i = 0; i < num; i++) {
+                    segmentLocations.add(new Point(-10, -10));
+                }
+            } else if (num < 0 && segmentLocations.size() + num > 0) {
+                for (int i = 0; i < -num; i++) {
+                    segmentLocations.remove(segmentLocations.size() - 1);
+                }
+            }
             return true;
         }
         return false;
