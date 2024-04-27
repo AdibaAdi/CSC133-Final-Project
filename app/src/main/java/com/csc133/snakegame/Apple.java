@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import java.util.Random;
+import android.graphics.RectF;
 
 class Apple implements DrawableMovable {
 
@@ -61,6 +62,20 @@ class Apple implements DrawableMovable {
         canvas.drawBitmap(mBitmapApple,
                 location.x * mSize, location.y * mSize, paint);
 
+    }
+
+    // Create hitbox of the apple
+    public RectF getHitbox() {
+        // Top left corner for reference
+        int left = location.x * mSize;
+        int top = location.y * mSize;
+
+        // Get the width and height of the apple bitmap
+        int width = mBitmapApple.getWidth();
+        int height = mBitmapApple.getHeight();
+
+        // Create a rectangle hitbox of the apple
+        return new RectF(left, top, left + width, top + height);
     }
 
     // Since the Apple doesn't move by itself, this method can be left empty

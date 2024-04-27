@@ -8,7 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.view.MotionEvent;
-
+import android.graphics.RectF;
 import java.util.ArrayList;
 
 class Snake implements DrawableMovable{
@@ -43,6 +43,7 @@ class Snake implements DrawableMovable{
     // A bitmap for the body
     private Bitmap mBitmapBody;
 
+    private static final int scaleFactor = 3; // The scale factor to increase the size by 3
 
     Snake(Context context, Point mr, int ss) {
         // Initialize our ArrayList
@@ -51,37 +52,63 @@ class Snake implements DrawableMovable{
         // Initialize the segment size and movement range from the passed in parameters
         mSegmentSize = ss;
         mMoveRange = mr;
-        double scaleFactor = 3; // The scale factor to increase the size by 1.5
 
-        // Load the image from resources
-        mBitmapHeadRight = BitmapFactory.decodeResource(context.getResources(), R.drawable.head);
+        // Create and scale the bitmaps
+        mBitmapHeadRight = BitmapFactory
+                .decodeResource(context.getResources(),
+                        R.drawable.head);
 
-        // Scale the head bitmap
-        mBitmapHeadRight = Bitmap.createScaledBitmap(mBitmapHeadRight, (int)(mSegmentSize * scaleFactor), (int)(mSegmentSize * scaleFactor), false);
+        // Create 3 more versions of the head for different headings
+        mBitmapHeadLeft = BitmapFactory
+                .decodeResource(context.getResources(),
+                        R.drawable.head);
 
-        // A matrix for scaling and rotating
+        mBitmapHeadUp = BitmapFactory
+                .decodeResource(context.getResources(),
+                        R.drawable.head);
+
+        mBitmapHeadDown = BitmapFactory
+                .decodeResource(context.getResources(),
+                        R.drawable.head);
+
+        // Modify the bitmaps to face the snake head
+        // in the correct direction
+        mBitmapHeadRight = Bitmap
+                .createScaledBitmap(mBitmapHeadRight,
+                        ss * scaleFactor, ss * scaleFactor, false);
+        // A matrix for scaling
         Matrix matrix = new Matrix();
-        // Use the matrix to flip the head for facing left
         matrix.preScale(-1, 1);
-        mBitmapHeadLeft = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
 
-        // Reset the matrix and rotate for facing up
-        matrix.reset();
+        mBitmapHeadLeft = Bitmap
+                .createBitmap(mBitmapHeadRight,
+                        0, 0, ss * scaleFactor, ss * scaleFactor, matrix, true);
+
+        // A matrix for rotating
         matrix.preRotate(-90);
-        mBitmapHeadUp = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
+        mBitmapHeadUp = Bitmap
+                .createBitmap(mBitmapHeadRight,
+                        0, 0, ss * scaleFactor, ss * scaleFactor, matrix, true);
 
-        // Reset the matrix and rotate for facing down (but facing the right side)
-        matrix.reset();
-        matrix.preRotate(90); // This is changed from 180 to 90 to face the right side
-        mBitmapHeadDown = Bitmap.createBitmap(mBitmapHeadRight, 0, 0, mBitmapHeadRight.getWidth(), mBitmapHeadRight.getHeight(), matrix, true);
+        // Matrix operations are cumulative
+        // so rotate by 180 to face down
+        matrix.preRotate(180);
+        mBitmapHeadDown = Bitmap
+                .createBitmap(mBitmapHeadRight,
+                        0, 0, ss * scaleFactor, ss * scaleFactor, matrix, true);
 
-        // Load and scale the body bitmap
-        mBitmapBody = BitmapFactory.decodeResource(context.getResources(), R.drawable.body);
-        mBitmapBody = Bitmap.createScaledBitmap(mBitmapBody, (int)(mSegmentSize * scaleFactor), (int)(mSegmentSize * scaleFactor), false);
+        // Create and scale the body
+        mBitmapBody = BitmapFactory
+                .decodeResource(context.getResources(),
+                        R.drawable.body);
+
+        mBitmapBody = Bitmap
+                .createScaledBitmap(mBitmapBody,
+                        ss, ss, false);
 
         // The halfway point across the screen in pixels
         // Used to detect which side of screen was pressed
-        halfWayPoint = mr.x * mSegmentSize / 2;
+        halfWayPoint = mr.x * ss / 2;
     }
 
     @Override
@@ -178,24 +205,21 @@ class Snake implements DrawableMovable{
         return dead;
     }
 
-    boolean checkDinner(Point l) {
-        if (segmentLocations.isEmpty()) {
-            // No head to check for dinner
-            return false;
-        }
-        //if (snakeXs[0] == l.x && snakeYs[0] == l.y) {
-        if (segmentLocations.get(0).x == l.x &&
-                segmentLocations.get(0).y == l.y) {
+    boolean checkDinner(RectF appleHitbox) {
+        // Get the head location of the snake
+        Point headLocation = segmentLocations.get(0);
 
-            // Add a new Point to the list
-            // located off-screen.
-            // This is OK because on the next call to
-            // move it will take the position of
-            // the segment in front of it
-            segmentLocations.add(new Point(-10, -10));
-            return true;
-        }
-        return false;
+        // Calculate the hitbox of the snake's head
+        int headLeft = headLocation.x * mSegmentSize;
+        int headTop = headLocation.y * mSegmentSize;
+        int headRight = headLeft + mSegmentSize;
+        int headBottom = headTop + mSegmentSize;
+
+        // Create a Rect representing the snake's head hitbox
+        RectF headHitbox = new RectF(headLeft, headTop, headRight, headBottom);
+
+        // Check if the snake's head hitbox intersects with the apple hitbox
+        return RectF.intersects(headHitbox, appleHitbox);
     }
 
     public void draw(Canvas canvas, Paint paint) {
@@ -203,37 +227,30 @@ class Snake implements DrawableMovable{
         if (!segmentLocations.isEmpty()) {
             // Existing drawing code...
             // Draw the head
+
+            // Calculate the offset to center the bitmap around the head location
+            int offsetX = (mBitmapHeadRight.getWidth() - mSegmentSize) / 2;
+            int offsetY = (mBitmapHeadRight.getHeight() - mSegmentSize) / 2;
+
+            Point headLocation = segmentLocations.get(0);
+            float headX = headLocation.x * mSegmentSize - offsetX;
+            float headY = headLocation.y * mSegmentSize - offsetY;
+
             switch (heading) {
                 case RIGHT:
-                    canvas.drawBitmap(mBitmapHeadRight,
-                            segmentLocations.get(0).x
-                                    * mSegmentSize,
-                            segmentLocations.get(0).y
-                                    * mSegmentSize, paint);
-                    break;
+                canvas.drawBitmap(mBitmapHeadRight, headX, headY, paint);
+                break;
 
                 case LEFT:
-                    canvas.drawBitmap(mBitmapHeadLeft,
-                            segmentLocations.get(0).x
-                                    * mSegmentSize,
-                            segmentLocations.get(0).y
-                                    * mSegmentSize, paint);
+                    canvas.drawBitmap(mBitmapHeadLeft, headX, headY, paint);
                     break;
 
                 case UP:
-                    canvas.drawBitmap(mBitmapHeadUp,
-                            segmentLocations.get(0).x
-                                    * mSegmentSize,
-                            segmentLocations.get(0).y
-                                    * mSegmentSize, paint);
+                    canvas.drawBitmap(mBitmapHeadUp, headX, headY, paint);
                     break;
 
                 case DOWN:
-                    canvas.drawBitmap(mBitmapHeadDown,
-                            segmentLocations.get(0).x
-                                    * mSegmentSize,
-                            segmentLocations.get(0).y
-                                    * mSegmentSize, paint);
+                    canvas.drawBitmap(mBitmapHeadDown, headX, headY, paint);
                     break;
             }
 

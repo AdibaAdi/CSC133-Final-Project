@@ -243,7 +243,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         mSnake.move(); // Move the snake
 
         // Check if the snake has eaten an apple
-        if (((Snake)mSnake).checkDinner(mApple.getLocation())) {
+        if (((Snake)mSnake).checkDinner(((Apple)mApple).getHitbox())) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -265,6 +265,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
 
                 }
             });
+
+            // Stop the background song when the snake dies
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+            }
+
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
