@@ -215,11 +215,21 @@ class Snake implements DrawableMovable{
         int headRight = headLeft + mSegmentSize;
         int headBottom = headTop + mSegmentSize;
 
-        // Create a Rect representing the snake's head hitbox
+        // Create a RectF representing the snake's head hitbox
         RectF headHitbox = new RectF(headLeft, headTop, headRight, headBottom);
 
-        // Check if the snake's head hitbox intersects with the apple hitbox
-        return RectF.intersects(headHitbox, appleHitbox);
+        // Check if the snake's head hitbox collides with the apple hitbox
+        if (RectF.intersects(headHitbox, appleHitbox)) {
+            // Add a new segment to the snake's body
+            // Place the new segment off-screen initially
+            segmentLocations.add(new Point(-10, -10));
+
+            // Return true to indicate the snake has eaten the apple
+            return true;
+        }
+
+        // Return false if the snake's head did not collide with the apple's hitbox
+        return false;
     }
 
     public void draw(Canvas canvas, Paint paint) {
@@ -261,6 +271,7 @@ class Snake implements DrawableMovable{
                                 * mSegmentSize,
                         segmentLocations.get(i).y
                                 * mSegmentSize, paint);
+
             }
         }
     }
