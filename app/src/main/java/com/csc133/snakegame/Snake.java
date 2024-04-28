@@ -205,7 +205,7 @@ class Snake implements DrawableMovable{
         return dead;
     }
 
-    boolean checkDinner(RectF appleHitbox) {
+    boolean checkDinner(RectF objectHitbox, int num) {
         // Get the head location of the snake
         Point headLocation = segmentLocations.get(0);
 
@@ -219,16 +219,20 @@ class Snake implements DrawableMovable{
         RectF headHitbox = new RectF(headLeft, headTop, headRight, headBottom);
 
         // Check if the snake's head hitbox collides with the apple hitbox
-        if (RectF.intersects(headHitbox, appleHitbox)) {
-            // Add a new segment to the snake's body
-            // Place the new segment off-screen initially
-            segmentLocations.add(new Point(-10, -10));
-
-            // Return true to indicate the snake has eaten the apple
+        if (RectF.intersects(headHitbox, objectHitbox)) {
+            // Add or remove segments based on the value of num
+            if (num > 0) {
+                for (int i = 0; i < num; i++) {
+                    segmentLocations.add(new Point(-10, -10));
+                }
+            } else if (num < 0 && segmentLocations.size() + num > 0) {
+                for (int i = 0; i < -num; i++) {
+                    segmentLocations.remove(segmentLocations.size() - 1);
+                }
+            }
             return true;
         }
 
-        // Return false if the snake's head did not collide with the apple's hitbox
         return false;
     }
 
