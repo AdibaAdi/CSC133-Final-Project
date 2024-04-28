@@ -306,7 +306,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     public void run() {
                         // UI updates here
                         ((Sword) sword).spawn(); // Respawn the apple
-                        mScore += -2; // Increase the score
+                        mScore += -1; // Increase the score
                     }
                 });
                 mSP.play(mEat_Sword_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
