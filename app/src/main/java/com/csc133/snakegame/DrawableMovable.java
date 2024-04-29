@@ -11,4 +11,6 @@ public interface DrawableMovable {
     Point getLocation();
     void reset();
 
+
+    void setSpeed(int easySpeed);
 }

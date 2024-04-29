@@ -23,6 +23,7 @@ public class SnakeActivity extends Activity implements GameOverListener {
     private Difficulty mCurrentDifficulty;
     private Bitmap menuBackground;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -71,6 +71,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
     private DrawableMovable mApple;
 
     private GameOverListener gameOverListener;
+    private static final int EASY_SPEED = 200; // Milliseconds per frame
+    private static final int MEDIUM_SPEED = 150;
+    private static final int HARD_SPEED = 100;
+
+    // Variable to hold the current speed
+    private int mCurrentSpeed;
 
     public void setGameOverListener(GameOverListener listener) {
         gameOverListener = listener;
@@ -81,13 +87,16 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         // Adjust game parameters based on difficulty
         switch (difficulty) {
             case EASY:
-                // Set parameters for easy difficulty
+                mSnake.setSpeed(EASY_SPEED);
+               // obstacle.setSpeed(EASY_SPEED);
                 break;
             case MEDIUM:
-                // Set parameters for medium difficulty
+                mSnake.setSpeed(MEDIUM_SPEED);
+                //obstacle.setSpeed(MEDIUM_SPEED);
                 break;
             case HARD:
-                // Set parameters for hard difficulty
+                mSnake.setSpeed(HARD_SPEED);
+                //obstacle.setSpeed(HARD_SPEED);
                 break;
         }
     }
