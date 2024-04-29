@@ -82,7 +82,9 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls{
         gameOverListener = listener;
     }
 
+    public  void Obstacle(int x, int y, int size){
 
+    }
     public void setDifficulty(Difficulty difficulty) {
         // Adjust game parameters based on difficulty
         switch (difficulty) {
