@@ -24,7 +24,9 @@ import android.media.MediaPlayer;
 
 class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
-
+    //private static final int EASY_SPEED = 200; // Milliseconds per frame
+    //private static final int MEDIUM_SPEED = 150;
+    //private static final int HARD_SPEED = 100;
     private Activity mActivity;
 
     private Typeface gameFont;
@@ -88,13 +90,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         // Adjust game parameters based on difficulty
         switch (difficulty) {
             case EASY:
-                // Set parameters for easy difficulty
+                //mSnake.setSpeed(EASY_SPEED);
                 break;
             case MEDIUM:
-                // Set parameters for medium difficulty
+                //mSnake.setSpeed(MEDIUM_SPEED);
                 break;
             case HARD:
-                // Set parameters for hard difficulty
+                //mSnake.setSpeed(HARD_SPEED);
                 break;
         }
     }
@@ -250,8 +252,24 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     public boolean updateRequired() {
 
         // Run at 10 frames per second
-        final long TARGET_FPS = 10;
+        final long TARGET_FPS;
         final long MILLIS_PER_SECOND = 1000;
+
+        // Determine target FPS based on level
+        switch (mCurrentDifficulty) {
+            case EASY: // Easy level
+                TARGET_FPS = 10; // 10 FPS
+                break;
+            case MEDIUM: // Medium level
+                TARGET_FPS = 20; // 20 FPS
+                break;
+            case HARD: // Hard level
+                TARGET_FPS = 30; // 30 FPS
+                break;
+            default:
+                TARGET_FPS = 10; // Default to 10 FPS for unknown levels
+                break;
+        }
 
         // Are we due to update the frame
         if (mNextFrameTime <= System.currentTimeMillis()) {
