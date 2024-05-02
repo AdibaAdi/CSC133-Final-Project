@@ -40,6 +40,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private volatile boolean mPaused = true;
     private PauseButtonHandler pauseButtonHandler;
     private Difficulty mCurrentDifficulty; // To hold the current difficulty level
+    private final Hard mHardObstacle;
 
 
     // for playing sound effects
@@ -179,6 +180,9 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
         mSwords = new DrawableMovable[]{mSword1, mSword2, mSword3, mSword4, mSword5};
         mCurrentDifficulty = difficulty;
+        mHardObstacle = new Hard(100, 200, 50, 50, Color.RED);
+
+
     }
 
 
@@ -290,6 +294,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
     // Update all the game objects
     public void update() {
+        mHardObstacle.move();
         mSnake.move(); // Move the snake
 
         // Check if the snake has eaten an apple
@@ -412,6 +417,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
             // Unlock the mCanvas and reveal the graphics for this frame
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
+            mHardObstacle.draw(mCanvas, mPaint);
         }
     }
 
