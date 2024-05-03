@@ -1,6 +1,6 @@
 package com.csc133.snakegame;
 
-import android.annotation.SuppressLint;
+//import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Bitmap;
@@ -44,6 +44,7 @@ public class SnakeActivity extends Activity implements GameOverListener {
 
         // Initially show the game menu
         setContentView(gameMenu);
+        setContentView(new RectangleView(this));
     }
 
     // Save the current difficulty in the instance state

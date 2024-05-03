@@ -1,5 +1,6 @@
 package com.csc133.snakegame;
 
+
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -22,12 +23,13 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 
 
+
+
 class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
-    //private static final int EASY_SPEED = 200; // Milliseconds per frame
-    //private static final int MEDIUM_SPEED = 150;
-    //private static final int HARD_SPEED = 100;
+
     private Activity mActivity;
+
 
     private Typeface gameFont;
     private Bitmap mBackgroundBitmap;
@@ -40,22 +42,26 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private volatile boolean mPaused = true;
     private PauseButtonHandler pauseButtonHandler;
     private Difficulty mCurrentDifficulty; // To hold the current difficulty level
-    private final Hard mHardObstacle;
+    private final Hard mHard;
 
 
     // for playing sound effects
     private SoundPool mSP;
+    //private int mEat_Bomb_ID = -1;
     private int mEat_Apple_ID = -1;
     private int mEat_Coin_ID = -1;
     private int mEat_Sword_ID = -1;
     private int mCrashID = -1;
 
+
     // The size in segments of the playable area
     private final int NUM_BLOCKS_WIDE = 40;
     private int mNumBlocksHigh;
 
+
     // How many points does the player have
     private int mScore;
+
 
     // Objects for drawing
     private Canvas mCanvas;
@@ -63,14 +69,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private Paint mPaint;
     private MediaPlayer mediaPlayer;
 
-
-    // A snake ssss
-//    private Snake mSnake;
-////    // And an apple
-//    private Apple mApple;
-
-
     // DrawableMovable interfaces for the snake and apple
+    private DrawableMovable mHardBomb;
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
     private DrawableMovable mCoin;
@@ -82,9 +82,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private DrawableMovable[] mSwords;
     private GameOverListener gameOverListener;
 
+
     public void setGameOverListener(GameOverListener listener) {
         gameOverListener = listener;
     }
+
+
 
 
     public void setDifficulty(Difficulty difficulty) {
@@ -102,23 +105,28 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         }
     }
 
+
     // This is the constructor method that gets called
     // from SnakeActivity
     public SnakeGame(Context context, Point size, Difficulty difficulty) {
         super(context);
 
+
         if (context instanceof Activity) {
             mActivity = (Activity) context;
         }
 
+
         int blockSize = size.x / NUM_BLOCKS_WIDE;
         mNumBlocksHigh = size.y / blockSize;
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build();
+
 
             mSP = new SoundPool.Builder()
                     .setMaxStreams(5)
@@ -128,21 +136,28 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             mSP = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
         }
 
+
         try {
             AssetManager assetManager = context.getAssets();
             AssetFileDescriptor descriptor;
 
+
             descriptor = assetManager.openFd("get_apple.ogg");
             mEat_Apple_ID = mSP.load(descriptor, 0);
+
 
             descriptor = assetManager.openFd("get_coin.ogg");
             mEat_Coin_ID = mSP.load(descriptor, 0);
 
+
             descriptor = assetManager.openFd("dragon_hurt.ogg");
             mEat_Sword_ID = mSP.load(descriptor, 0);
 
+
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
+
+
 
 
             // MediaPlayer for background song
@@ -152,22 +167,28 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mediaPlayer.prepare();
 
+
             // Start playing the background song
             mediaPlayer.setVolume(1.0f, 1.0f);
             mediaPlayer.setLooping(true); // Optional: set the song to loop
             mediaPlayer.start();
 
+
         } catch (IOException e) {
             // Error handling
         }
 
+
         mSurfaceHolder = getHolder();
         mPaint = new Paint();
+
 
         mBackgroundBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.game_background);
         mBackgroundBitmap = Bitmap.createScaledBitmap(mBackgroundBitmap, size.x, size.y, false);
 
+
         gameFont = Typeface.createFromAsset(context.getAssets(), "fonts/press_start_2p.ttf");
+
 
         mApple = new Apple(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
         mSnake = new Snake(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
@@ -178,17 +199,23 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         mSword4 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
         mSword5 = new Sword(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
 
+
         mSwords = new DrawableMovable[]{mSword1, mSword2, mSword3, mSword4, mSword5};
         mCurrentDifficulty = difficulty;
-        mHardObstacle = new Hard(100, 200, 50, 50, Color.RED);
+        mHard = new Hard(context, 100, 100, 50, Color.WHITE);
+
+
 
 
     }
+
+
 
 
     public void setPauseButtonHandler(PauseButtonHandler handler) {
         this.pauseButtonHandler = handler;
     }
+
 
     // Called to start a new game
     public void newGame() {
@@ -198,11 +225,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         // Always spawn the apple
         ((Apple) mApple).spawn(); // Respawn the apple
 
+
         // Check if the difficulty is medium
         if (mCurrentDifficulty == Difficulty.MEDIUM) {
             // Prepare the game objects for a new game
             mCoin.reset(); // Reset the coin object
             ((Coin) mCoin).spawn(); // Respawn the coin
+
 
             for (DrawableMovable sword : mSwords) {
                 sword.reset();
@@ -210,18 +239,23 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             }
         }
 
+
         // Reset the score
         mScore = 0;
 
+
         // Setup mNextFrameTime so an update can be triggered
         mNextFrameTime = System.currentTimeMillis();
+
 
         // Reset the pause button if the handler is set
         if (pauseButtonHandler != null) {
             pauseButtonHandler.resetPauseButton();
         }
 
+
     }
+
 
     // Handles the game loop
     @Override
@@ -236,9 +270,11 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 }
             }
 
+
             draw();
         }
     }
+
 
     // Implement the GameControls interface methods
     @Override
@@ -246,18 +282,23 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         mPaused = true;
     }
 
+
     @Override
     public void resumeGame() {
         mPaused = false;
     }
 
 
+
+
     // Check to see if it is time for an update
     public boolean updateRequired() {
+
 
         // Run at 10 frames per second
         final long TARGET_FPS;
         final long MILLIS_PER_SECOND = 1000;
+
 
         // Determine target FPS based on level
         switch (mCurrentDifficulty) {
@@ -275,27 +316,33 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 break;
         }
 
+
         // Are we due to update the frame
         if (mNextFrameTime <= System.currentTimeMillis()) {
             // Tenth of a second has passed
 
+
             // Setup when the next update will be triggered
             mNextFrameTime = System.currentTimeMillis()
                     + MILLIS_PER_SECOND / TARGET_FPS;
+
 
             // Return true so that the update and draw
             // methods are executed
             return true;
         }
 
+
         return false;
     }
 
 
+
+
     // Update all the game objects
     public void update() {
-        mHardObstacle.move();
         mSnake.move(); // Move the snake
+
 
         // Check if the snake has eaten an apple
         if (((Snake) mSnake).checkDinner(((Apple) mApple).getHitbox(), 1)) {
@@ -310,6 +357,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             mSP.play(mEat_Apple_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
 
+
         if (((Snake) mSnake).checkDinner(((Coin) mCoin).getHitbox(), 2)) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -321,6 +369,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             });
             mSP.play(mEat_Coin_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
+
 
         for (DrawableMovable sword : mSwords) {
             if (((Snake) mSnake).checkDinner(((Sword) sword).getHitbox(), -2)) {
@@ -334,7 +383,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 });
                 mSP.play(mEat_Sword_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
             }
+
+
         }
+
 
         // Check if the snake has died
         if (((Snake) mSnake).detectDeath()) {
@@ -343,23 +395,27 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 public void run() {
                     // Don't automatically start a new game. Just pause and show "Tap to Play".
                     mPaused = true;
-
                 }
             });
+
 
             // Stop the background song when the snake dies
             if (mediaPlayer != null) {
                 mediaPlayer.stop();
             }
 
+
             mSP.play(mCrashID, 1, 1, 0, 0, 1); // Play death sound
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
             }
 
+
             mSP.play(mCrashID, 0.2F, 0.2F, 0, 0, 1); // Play death sound
         }
     }
+
+
 
 
     // Do all the drawing
@@ -368,24 +424,29 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         if (mSurfaceHolder.getSurface().isValid()) {
             mCanvas = mSurfaceHolder.lockCanvas();
 
+
             // Check if the mCanvas is null
             if (mCanvas == null) {
                 return; // If mCanvas is null, exit the method to avoid NullPointerException
             }
 
+
             // Draw the background first
             mCanvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
+
 
             // Draw the names in the top right corner
             mPaint.setTextSize(40); // Smaller size for better screen fit
             mPaint.setColor(Color.WHITE);
             mPaint.setTypeface(gameFont);
 
+
             // Draw the difficulty level below the score
             String difficultyText = "Level: " + mCurrentDifficulty.name();
             // Use the same text size as the score or adjust as needed
             mPaint.setTextSize(60);
             mCanvas.drawText(difficultyText, 20, 190, mPaint); // Position it below the score
+
 
             // Calculate the position for "Jacob & Adiba" to appear in the top right corner
             String names = "Group 5";
@@ -394,17 +455,21 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             float yPositionNames = 60; // 60 pixels from the top
             mCanvas.drawText(names, xPositionNames, yPositionNames, mPaint);
 
+
             // Draw the score in the top left corner
             mPaint.setTextSize(60); // Adjust text size for the score
             mCanvas.drawText("Score: " + mScore, 20, 120, mPaint); // Adjust y-position to avoid overlap with names
 
+
             // Draw the apple and the snake
+            mHard.draw(mCanvas, mPaint);
             mApple.draw(mCanvas, mPaint);
             mCoin.draw(mCanvas, mPaint);
             for (DrawableMovable sword : mSwords) {
                 sword.draw(mCanvas, mPaint);
             }
             mSnake.draw(mCanvas, mPaint);
+
 
             // If the game is paused, draw the "Tap to Play" message centered
             if (mPaused) {
@@ -415,11 +480,14 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 mCanvas.drawText("Tap to Play", xPositionTapToPlay, yPositionTapToPlay, mPaint);
             }
 
+
             // Unlock the mCanvas and reveal the graphics for this frame
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
-            mHardObstacle.draw(mCanvas, mPaint);
+            mHard.draw(mCanvas, mPaint);
         }
     }
+
+
 
 
     @Override
@@ -445,6 +513,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     }
 
 
+
+
     // Stop the thread
     public void pause() {
         mPlaying = false;
@@ -456,6 +526,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     }
 
 
+
+
     // Start the thread
     public void resume() {
         newGame(); // Set up the initial game state
@@ -465,5 +537,5 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     }
 
     // Called to start a new game
-
 }
+
