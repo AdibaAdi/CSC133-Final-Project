@@ -118,6 +118,11 @@ class Snake implements DrawableMovable{
         heading = Heading.RIGHT; // Default direction
     }
 
+    @Override
+    public void spawn() {
+
+    }
+
 
     // Get the snake ready for a new game
     void reset(int w, int h) {

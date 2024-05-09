@@ -10,5 +10,6 @@ public interface DrawableMovable {
     void move();
     Point getLocation();
     void reset();
+    void spawn();
 
 }
