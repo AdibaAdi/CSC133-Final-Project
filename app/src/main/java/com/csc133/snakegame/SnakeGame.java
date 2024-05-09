@@ -47,7 +47,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private int mEat_Apple_ID = -1;
     private int mEat_Coin_ID = -1;
     private int mEat_Sword_ID = -1;
-    private int mEat_Hard_ID = -1;
+
+    //private int mEat_Hard_ID = -1;
     private int mCrashID = -1;
 
     // The size in segments of the playable area
@@ -145,12 +146,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
 
-            descriptor = assetManager.openFd("get_bomb.ogg");
-            mEat_Hard_ID = mSP.load(descriptor, 0);
+            //descriptor = assetManager.openFd("get_bomb.ogg");
+            //mEat_Hard_ID = mSP.load(descriptor, 0);
 
 
             // MediaPlayer for background song
-            descriptor = assetManager.openFd("ali_rap.mp3");
+            descriptor = assetManager.openFd("ali_rap.ogg");
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -164,6 +165,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         } catch (IOException e) {
             // Error handling
         }
+
 
         mSurfaceHolder = getHolder();
         mPaint = new Paint();
@@ -361,7 +363,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
             }
-            mSP.play(mEat_Hard_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+            //mSP.play(mEat_Hard_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
 
         for (DrawableMovable sword : mSwords) {
