@@ -48,7 +48,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private int mEat_Coin_ID = -1;
     private int mEat_Sword_ID = -1;
 
-    //private int mEat_Hard_ID = -1;
+    private int mEat_Hard_ID = -1;
     private int mCrashID = -1;
 
     // The size in segments of the playable area
@@ -146,8 +146,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
 
-            //descriptor = assetManager.openFd("get_bomb.ogg");
-            //mEat_Hard_ID = mSP.load(descriptor, 0);
+            descriptor = assetManager.openFd("get_bomb.ogg");
+            mEat_Hard_ID = mSP.load(descriptor, 0);
 
 
             // MediaPlayer for background song
@@ -329,7 +329,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     createAdditionalBombs(additionalBombsToCreate);
                 }
             });
-            mSP.play(mEat_Apple_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+            mSP.play(mEat_Apple_ID, 1.0F, 1.0F, 0, 0, 1); // Play eating sound
 
 
         }
@@ -344,7 +344,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     multiplyBombCount();
                 }
             });
-            mSP.play(mEat_Coin_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+            mSP.play(mEat_Coin_ID, 0.6F, 0.6F, 0, 0, 1); // Play eating sound
         }
         if (((Snake) mSnake).checkDinner(((Hard) mHard).getHitbox(), -2)) {
             mActivity.runOnUiThread(new Runnable() {
@@ -363,7 +363,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             if (gameOverListener != null) {
                 gameOverListener.onGameOver(mScore);
             }
-            //mSP.play(mEat_Hard_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+            mSP.play(mCrashID, 0.4F, 0.4F, 0, 0, 1); // Play death sound
+            mSP.play(mEat_Hard_ID, 1F, 1F, 0, 0, 1); // Play eating sound
         }
 
         for (DrawableMovable sword : mSwords) {
@@ -376,7 +377,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                         mScore += -1; // Increase the score
                     }
                 });
-                mSP.play(mEat_Sword_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+                mSP.play(mEat_Sword_ID, 0.6F, 0.6F, 0, 0, 1); // Play eating sound
             }
         }
 
@@ -401,7 +402,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 gameOverListener.onGameOver(mScore);
             }
 
-            mSP.play(mCrashID, 0.2F, 0.2F, 0, 0, 1); // Play death sound
+            mSP.play(mCrashID, 0.4F, 0.4F, 0, 0, 1); // Play death sound
         }
 
 
