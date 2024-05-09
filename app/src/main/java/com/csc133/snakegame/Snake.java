@@ -21,7 +21,6 @@ class Snake implements DrawableMovable{
 
     // How big is the entire grid
     private Point mMoveRange;
-
     // Where is the centre of the screen
     // horizontally in pixels?
     private int halfWayPoint;
