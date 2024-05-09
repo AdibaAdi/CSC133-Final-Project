@@ -23,6 +23,7 @@ class Apple implements DrawableMovable {
     // An image to represent the apple
     private Bitmap mBitmapApple;
 
+    private int additionalBombsToCreate = 0;
     /// Set up the apple in the constructor
     Apple(Context context, Point sr, int s){
 
@@ -42,7 +43,17 @@ class Apple implements DrawableMovable {
         //mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, s, s, false);
         mBitmapApple = Bitmap.createScaledBitmap(mBitmapApple, (int)(mSize * scaleFactor), (int)(mSize * scaleFactor), false);
     }
+    public void setAdditionalBombsToCreate(int count) {
+        additionalBombsToCreate = count;
+    }
 
+
+
+    public int getAdditionalBombsToCreate() {
+        // Logic to determine the number of additional bombs to create
+        // For example, you can return a constant value or calculate it based on certain conditions
+        return 0; // Replace 0 with your logic
+    }
     // This is called every time an apple is eaten
     public void spawn(){
         // Choose two random values and place the apple

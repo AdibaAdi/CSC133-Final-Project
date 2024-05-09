@@ -22,6 +22,8 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 
 
+
+
 class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
 
@@ -142,8 +144,9 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
             descriptor = assetManager.openFd("snake_death.ogg");
             mCrashID = mSP.load(descriptor, 0);
+
             descriptor = assetManager.openFd("get_bomb.ogg");
-            mEat_Apple_ID = mSP.load(descriptor, 0);
+            mEat_Hard_ID = mSP.load(descriptor, 0);
 
 
             // MediaPlayer for background song
@@ -213,10 +216,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             ((Coin) mCoin).spawn(); // Respawn the coin
             mHard.reset();
             ((Hard) mHard).spawn();
-            for (DrawableMovable sword : mSwords) {
-                sword.reset();
-                ((Sword) sword).spawn(); // Respawn the swords
-            }
+
         }
 
         // Reset the score
@@ -255,6 +255,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         mPaused = true;
     }
 
+
+
     @Override
     public void resumeGame() {
         mPaused = false;
@@ -275,8 +277,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 TARGET_FPS = 20; // 20 FPS
                 break;
             case HARD: // Hard level
-                TARGET_FPS = 30; // 30 FPS
-                break;
+                //TARGET_FPS = 30; // 30 FPS
+                //break;
             default:
                 TARGET_FPS = 10; // Default to 10 FPS for unknown levels
                 break;
@@ -298,6 +300,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         return false;
     }
 
+    // Method to create additional bombs
+    public void createAdditionalBombs(int count) {
+        for (int i = 0; i < count; i++) {
+            mHard.reset(); // Reset the bomb object
+            mHard.spawn(); // Respawn the bomb
+        }
+    }
 
     // Update all the game objects
     public void update() {
@@ -312,9 +321,15 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     // UI updates here
                     ((Apple) mApple).spawn(); // Respawn the apple
                     mScore += 1; // Increase the score
+                    multiplyBombCount();
+                    multiplyBombCount();
+                    int additionalBombsToCreate = ((Apple) mApple).getAdditionalBombsToCreate();
+                    createAdditionalBombs(additionalBombsToCreate);
                 }
             });
             mSP.play(mEat_Apple_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
+
+
         }
 
         if (((Snake) mSnake).checkDinner(((Coin) mCoin).getHitbox(), 2)) {
@@ -324,19 +339,28 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     // UI updates here
                     ((Coin) mCoin).spawn(); // Respawn the apple
                     mScore += 2; // Increase the score
+                    multiplyBombCount();
                 }
             });
             mSP.play(mEat_Coin_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
-        if (((Snake) mSnake).checkDinner(((Hard) mHard).getHitbox(), 2)) {
+        if (((Snake) mSnake).checkDinner(((Hard) mHard).getHitbox(), -2)) {
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     // UI updates here
-                    ((Hard) mHard).spawn(); // Respawn the Bomb
-                    mScore += 2; // Increase the score
+                    //((Hard) mHard).spawn(); // Respawn the Bomb
+                    mPaused = true;
                 }
             });
+            if (mediaPlayer != null) {
+                mediaPlayer.stop();
+            }
+
+            // Trigger game over actions, such as showing a message or resetting the game
+            if (gameOverListener != null) {
+                gameOverListener.onGameOver(mScore);
+            }
             mSP.play(mEat_Hard_ID, 0.2F, 0.2F, 0, 0, 1); // Play eating sound
         }
 
@@ -377,9 +401,15 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
             mSP.play(mCrashID, 0.2F, 0.2F, 0, 0, 1); // Play death sound
         }
+
+
     }
 
-
+    private void multiplyBombCount() {
+            int currentBombCount = ((Hard) mHard).getBombCount();
+            currentBombCount++;
+            ((Hard) mHard).setBombCount(currentBombCount);
+    }
     // Do all the drawing
     public void draw() {
         // Get a lock on the mCanvas

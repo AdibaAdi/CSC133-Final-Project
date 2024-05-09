@@ -7,23 +7,25 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RectF;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Hard implements DrawableMovable {
+    private List<Bomb> bombs = new ArrayList<>();
+
+    private int bombCount;
 
     private Point location = new Point();
     private int mSize;
-
     private Bitmap mBitmapBomb;
 
     private Point mSpawnRange; // Define spawn range for the Bomb
 
-
-
     private enum Direction {
         UP, DOWN, LEFT, RIGHT
     }
+
 
     private Direction direction;
 
@@ -36,6 +38,7 @@ public class Hard implements DrawableMovable {
         mBitmapBomb = BitmapFactory.decodeResource(context.getResources(), R.drawable.bomb);
         mBitmapBomb = Bitmap.createScaledBitmap(mBitmapBomb, (int) (mSize * scaleFactor), (int) (mSize * scaleFactor), false);
 
+
         // Initialize the direction randomly
         direction = Direction.values()[new Random().nextInt(Direction.values().length)];
     }
@@ -45,13 +48,16 @@ public class Hard implements DrawableMovable {
         location.y = random.nextInt(mSpawnRange.y - 1) + 1;
     }
 
+
     public Point getLocation() {
         return location;
     }
 
+
     public void draw(Canvas canvas, Paint paint) {
         canvas.drawBitmap(mBitmapBomb, location.x * mSize, location.y * mSize, paint);
     }
+
 
     public RectF getHitbox() {
         int left = location.x * mSize;
@@ -60,6 +66,7 @@ public class Hard implements DrawableMovable {
         int height = mBitmapBomb.getHeight();
         return new RectF(left, top, left + width, top + height);
     }
+
 
     @Override
     public void move() {
@@ -82,11 +89,19 @@ public class Hard implements DrawableMovable {
             changeDirectionRandomly();
         }
 
+
+    }
+    public int getBombCount() {
+        return bombs.size(); // Assuming you want to return the number of bombs in the list
+    }
+    public void setBombCount(int count) {
+        this.bombCount = count;
     }
     private void changeDirectionRandomly() {
         // Change direction randomly
         direction = Direction.values()[new Random().nextInt(Direction.values().length)];
     }
+
 
     @Override
     public void reset() {
