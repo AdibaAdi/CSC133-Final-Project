@@ -32,21 +32,17 @@ public class SnakeActivity extends Activity implements GameOverListener {
         display.getSize(size);
 
         menuBackground = BitmapFactory.decodeResource(getResources(), R.drawable.menu_background);
-        gameMenu = new GameMenu(this, menuBackground, size); // Pass size to properly scale the background
+        gameMenu = new GameMenu(this, menuBackground, size);
 
+        mCurrentDifficulty = Difficulty.MEDIUM; // Default to MEDIUM difficulty
         if (savedInstanceState != null) {
-            // Restore difficulty if there is a saved instance state
             mCurrentDifficulty = (Difficulty) savedInstanceState.getSerializable("CurrentDifficulty");
-        } else {
-            // Default to MEDIUM difficulty or any other default
-            mCurrentDifficulty = Difficulty.MEDIUM;
         }
 
         // Initially show the game menu
         setContentView(gameMenu);
     }
 
-    // Save the current difficulty in the instance state
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -57,9 +53,8 @@ public class SnakeActivity extends Activity implements GameOverListener {
         mCurrentDifficulty = difficulty; // Set the current difficulty
         Point gameSize = getSize();
 
-        // Create a new SnakeGame instance with the current difficulty
         mSnakeGame = new SnakeGame(this, gameSize, mCurrentDifficulty);
-        mSnakeGame.setDifficulty(mCurrentDifficulty); // Optional if set in the constructor
+        mSnakeGame.setDifficulty(mCurrentDifficulty);
 
         pauseButtonHandler = new PauseButtonHandler(this, mSnakeGame);
         mSnakeGame.setPauseButtonHandler(pauseButtonHandler);
@@ -75,9 +70,9 @@ public class SnakeActivity extends Activity implements GameOverListener {
         gameLayout.addView(mSnakeGame);
         gameLayout.addView(pauseButtonHandler.getPauseButton(), buttonParams);
 
-        setContentView(gameLayout); // Switch view to the game layout
+        setContentView(gameLayout);
         mSnakeGame.setGameOverListener(this);
-        mSnakeGame.resume(); // Start/resume the game
+        mSnakeGame.resume();
     }
 
     @Override
@@ -103,11 +98,12 @@ public class SnakeActivity extends Activity implements GameOverListener {
             TextView tvScore = gameOverView.findViewById(R.id.tvScore);
             tvScore.setText(getResources().getString(R.string.score_text, score));
 
-
             new AlertDialog.Builder(SnakeActivity.this)
                     .setView(gameOverView)
                     .setPositiveButton("Play Again", (dialog, id) -> startGame(mCurrentDifficulty))
-                    .setNegativeButton("Exit to Menu", (dialog, id) -> setContentView(gameMenu))
+                    .setNegativeButton("Exit to Menu", (dialog, id) -> {
+                        setContentView(gameMenu); // Exit to menu after game over
+                    })
                     .setCancelable(false)
                     .show();
         });

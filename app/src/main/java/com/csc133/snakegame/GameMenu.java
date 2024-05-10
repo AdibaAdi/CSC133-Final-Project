@@ -1,6 +1,7 @@
 package com.csc133.snakegame;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -24,31 +25,37 @@ class GameMenu extends View {
     private SnakeActivity mSnakeActivity;
 
     private int headingTop;
+    private Rect mLeaderboardButton;
 
-        public GameMenu(Context context, Bitmap background, Point size) {
-            super(context);
-            mSnakeActivity = (SnakeActivity) context;
-            // Scale the background bitmap to fit the screen
-            mBackgroundBitmap = Bitmap.createScaledBitmap(background, size.x, size.y, false);
-            mPaint = new Paint();
+    public GameMenu(Context context, Bitmap background, Point size) {
+        super(context);
+        mSnakeActivity = (SnakeActivity) context;
+        // Scale the background bitmap to fit the screen
+        mBackgroundBitmap = Bitmap.createScaledBitmap(background, size.x, size.y, false);
+        mPaint = new Paint();
 
 
-            // Calculate the position of the difficulty level heading and buttons
-            int left = size.x / 2; // Center of the screen horizontally
-            int top = size.y / 2; // Center of the screen vertically or wherever the buttons should start
+        // Calculate the position of the difficulty level heading and buttons
+        int left = size.x / 2; // Center of the screen horizontally
+        int top = size.y / 2; // Center of the screen vertically or wherever the buttons should start
 
-            // These values may need to be adjusted to fit the content and aesthetics
-            int buttonWidth = 200; // Width of each button
-            int buttonHeight = 100; // Height of each button
-            // Initialize headingTop here based on the provided size
-            headingTop = size.y / 2 - 150;
-            mPaint.setTextAlign(Paint.Align.CENTER); // Center text horizontally
+        // These values may need to be adjusted to fit the content and aesthetics
+        int buttonWidth = 200; // Width of each button
+        int buttonHeight = 100; // Height of each button
+        // Initialize headingTop here based on the provided size
+        headingTop = size.y / 2 - 150;
+        mPaint.setTextAlign(Paint.Align.CENTER); // Center text horizontally
 
-            // Define the button rectangles centered horizontally
-            mEasyButton = new Rect(left - buttonWidth / 2, top, left + buttonWidth / 2, top + buttonHeight);
-            mMediumButton = new Rect(left - buttonWidth / 2, top + buttonHeight + 20, left + buttonWidth / 2, top + buttonHeight * 2 + 20);
-            mHardButton = new Rect(left - buttonWidth / 2, top + buttonHeight * 2 + 40, left + buttonWidth / 2, top + buttonHeight * 3 + 40);
-        }
+        // Define the button rectangles centered horizontally
+        mEasyButton = new Rect(left - buttonWidth / 2, top, left + buttonWidth / 2, top + buttonHeight);
+        mMediumButton = new Rect(left - buttonWidth / 2, top + buttonHeight + 20, left + buttonWidth / 2, top + buttonHeight * 2 + 20);
+        mHardButton = new Rect(left - buttonWidth / 2, top + buttonHeight * 2 + 40, left + buttonWidth / 2, top + buttonHeight * 3 + 40);
+        //leaderboard button
+        int buttonTop = mHardButton.bottom + 20;
+        mLeaderboardButton = new Rect(left - buttonWidth / 2, buttonTop, left + buttonWidth / 2, buttonTop + buttonHeight);
+
+
+    }
 
 
     @Override
@@ -72,6 +79,8 @@ class GameMenu extends View {
         canvas.drawText("Easy", mEasyButton.centerX(), mEasyButton.centerY() + mPaint.getTextSize() / 3, mPaint);
         canvas.drawText("Medium", mMediumButton.centerX(), mMediumButton.centerY() + mPaint.getTextSize() / 3, mPaint);
         canvas.drawText("Hard", mHardButton.centerX(), mHardButton.centerY() + mPaint.getTextSize() / 3, mPaint);
+        canvas.drawText("Leaderboard", mLeaderboardButton.centerX(), mLeaderboardButton.centerY() + mPaint.getTextSize() / 3, mPaint);
+
     }
 
 
@@ -80,22 +89,26 @@ class GameMenu extends View {
         int x = (int) event.getX();
         int y = (int) event.getY();
 
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                // Check if a difficulty button was pressed
-                if (mEasyButton.contains(x, y)) {
-                    selectedDifficulty = Difficulty.EASY;
-                } else if (mMediumButton.contains(x, y)) {
-                    selectedDifficulty = Difficulty.MEDIUM;
-                } else if (mHardButton.contains(x, y)) {
-                    selectedDifficulty = Difficulty.HARD;
-                }
-                // Once a difficulty is selected, start the game
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (mLeaderboardButton.contains(x, y)) {
+                Intent intent = new Intent(getContext(), LeaderboardActivity.class);
+                getContext().startActivity(intent);
+                return true;
+            } else if (mEasyButton.contains(x, y)) {
+                selectedDifficulty = Difficulty.EASY;
                 mSnakeActivity.startGame(selectedDifficulty);
                 return true;
+            } else if (mMediumButton.contains(x, y)) {
+                selectedDifficulty = Difficulty.MEDIUM;
+                mSnakeActivity.startGame(selectedDifficulty);
+                return true;
+            } else if (mHardButton.contains(x, y)) {
+                selectedDifficulty = Difficulty.HARD;
+                mSnakeActivity.startGame(selectedDifficulty);
+                return true;
+            }
         }
-
         return super.onTouchEvent(event);
     }
-}
 
+}

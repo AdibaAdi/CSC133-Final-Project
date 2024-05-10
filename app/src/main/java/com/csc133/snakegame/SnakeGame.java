@@ -1,6 +1,9 @@
 package com.csc133.snakegame;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Canvas;
@@ -21,7 +24,7 @@ import android.graphics.Typeface;
 import android.app.Activity;
 import android.media.MediaPlayer;
 
-
+import android.util.Log;  // Import Log class
 
 
 class SnakeGame extends SurfaceView implements Runnable, GameControls {
@@ -54,7 +57,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     // The size in segments of the playable area
     private final int NUM_BLOCKS_WIDE = 40;
     private int mNumBlocksHigh;
-
+    private GameOverListener gameOverListener;
     // How many points does the player have
     private int mScore;
 
@@ -82,7 +85,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private DrawableMovable mSword5;
     private DrawableMovable[] mSwords;
     private DrawableMovable mHard;
-    private GameOverListener gameOverListener;
 
     public void setGameOverListener(GameOverListener listener) {
         gameOverListener = listener;
@@ -515,6 +517,35 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         mThread.start();
     }
 
-    // Called to start a new game
+    // Call this when the game ends
+    public void onGameOver() {
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                saveHighScore(mScore);
+                if (gameOverListener != null) {
+                    gameOverListener.onGameOver(mScore);
+                }
+            }
+        });
+    }
+
+    // Save high score
+
+
+    private void saveHighScore(int newScore) {
+        SharedPreferences prefs = getContext().getSharedPreferences("SnakeGamePrefs", MODE_PRIVATE);
+        String key = "HighScore_" + mCurrentDifficulty.name();
+        int highScore = prefs.getInt(key, 0);
+        Log.d("SaveHighScore", "Current high score for " + key + ": " + highScore + ", New score: " + newScore);
+        if (newScore > highScore) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt(key, newScore);
+            editor.apply();
+            Log.d("SaveHighScore", "New high score saved for " + key + ": " + newScore);
+        }
+    }
+
+
 
 }
