@@ -34,6 +34,9 @@ class GameMenu extends View {
         mBackgroundBitmap = Bitmap.createScaledBitmap(background, size.x, size.y, false);
         mPaint = new Paint();
 
+        // Load the custom font
+        Typeface customFont = Typeface.createFromAsset(context.getAssets(), "fonts/RINGM___.TTF");
+        mPaint.setTypeface(customFont);
 
         // Calculate the position of the difficulty level heading and buttons
         int left = size.x / 2; // Center of the screen horizontally
@@ -68,9 +71,7 @@ class GameMenu extends View {
         canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
         mPaint.setColor(Color.WHITE);
         mPaint.setTextSize(60); // Adjust text size if necessary
-        mPaint.setTypeface(Typeface.DEFAULT_BOLD); // Set text to bold
 
-        // Adjust your drawing coordinates using viewWidth and viewHeight
         // Draw the difficulty level heading
         canvas.drawText("Difficulty Level", viewWidth / 2, headingTop, mPaint);
 
