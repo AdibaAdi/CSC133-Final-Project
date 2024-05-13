@@ -407,7 +407,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             mSP.play(mCrashID, 0.4F, 0.4F, 0, 0, 1); // Play death sound
         }
 
-
+        saveHighScore(mScore);
     }
 
     private void multiplyBombCount() {
