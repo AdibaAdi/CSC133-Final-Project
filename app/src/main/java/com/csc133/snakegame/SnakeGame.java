@@ -66,14 +66,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private SurfaceHolder mSurfaceHolder;
     private Paint mPaint;
     private MediaPlayer mediaPlayer;
-
-
-    // A snake ssss
-//    private Snake mSnake;
-////    // And an apple
-//    private Apple mApple;
-
-
+    private Hard[] mHard;
     // DrawableMovable interfaces for the snake and apple
     private DrawableMovable mSnake;
     private DrawableMovable mApple;
@@ -84,7 +77,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     private DrawableMovable mSword4;
     private DrawableMovable mSword5;
     private DrawableMovable[] mSwords;
-    private DrawableMovable mHard;
+    //private DrawableMovable mHard;
 
     public void setGameOverListener(GameOverListener listener) {
         gameOverListener = listener;
@@ -188,7 +181,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
         mSwords = new DrawableMovable[]{mSword1, mSword2, mSword3, mSword4, mSword5};
         mCurrentDifficulty = difficulty;
-        mHard = new Hard(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        //mHard = new Hard(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+        mHard = new Hard[3];
+        for (int i = 0; i < 3; i++){
+            mHard[i]= new Hard(context, new Point(NUM_BLOCKS_WIDE, mNumBlocksHigh), blockSize);
+            mHard[i].spawn();
+        }
     }
 
 
@@ -218,8 +216,10 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             // Prepare the game objects for a new game
             mCoin.reset(); // Reset the coin object
             ((Coin) mCoin).spawn(); // Respawn the coin
-            mHard.reset();
-            ((Hard) mHard).spawn();
+            for (int i = 0; i < 3; i++) {
+                mHard[i].reset();
+                ((Hard) mHard[i]).spawn();
+            }
 
         }
 
@@ -259,8 +259,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         mPaused = true;
     }
 
-
-
     @Override
     public void resumeGame() {
         mPaused = false;
@@ -281,8 +279,8 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 TARGET_FPS = 20; // 20 FPS
                 break;
             case HARD: // Hard level
-                //TARGET_FPS = 30; // 30 FPS
-                //break;
+                TARGET_FPS = 25; // 25 FPS
+                break;
             default:
                 TARGET_FPS = 10; // Default to 10 FPS for unknown levels
                 break;
@@ -304,17 +302,13 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         return false;
     }
 
-    // Method to create additional bombs
-    public void createAdditionalBombs(int count) {
-        for (int i = 0; i < count; i++) {
-            mHard.reset(); // Reset the bomb object
-            mHard.spawn(); // Respawn the bomb
-        }
-    }
-
     // Update all the game objects
     public void update() {
-        mHard.move();
+        //mHard.move();
+        for (int i = 0; i <3; i++){
+            mHard[i].move();
+        }
+
         mSnake.move(); // Move the snake
 
         // Check if the snake has eaten an apple
@@ -325,10 +319,7 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                     // UI updates here
                     ((Apple) mApple).spawn(); // Respawn the apple
                     mScore += 1; // Increase the score
-                    multiplyBombCount();
-                    multiplyBombCount();
-                    int additionalBombsToCreate = ((Apple) mApple).getAdditionalBombsToCreate();
-                    createAdditionalBombs(additionalBombsToCreate);
+
                 }
             });
             mSP.play(mEat_Apple_ID, 1.0F, 1.0F, 0, 0, 1); // Play eating sound
@@ -341,32 +332,32 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
                 @Override
                 public void run() {
                     // UI updates here
-                    ((Coin) mCoin).spawn(); // Respawn the apple
+                    ((Coin) mCoin).spawn(); // Respawn the Coin
                     mScore += 2; // Increase the score
-                    multiplyBombCount();
                 }
             });
             mSP.play(mEat_Coin_ID, 0.6F, 0.6F, 0, 0, 1); // Play eating sound
         }
-        if (((Snake) mSnake).checkDinner(((Hard) mHard).getHitbox(), -2)) {
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    // UI updates here
-                    //((Hard) mHard).spawn(); // Respawn the Bomb
-                    mPaused = true;
+        for (int i = 0; i <3; i++) {
+            if (((Snake) mSnake).checkDinner(((Hard) mHard[i]).getHitbox(), -2)) {
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // UI updates here
+                        mPaused = true; // colliding the game is over
+                    }
+                });
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
                 }
-            });
-            if (mediaPlayer != null) {
-                mediaPlayer.stop();
-            }
 
-            // Trigger game over actions, such as showing a message or resetting the game
-            if (gameOverListener != null) {
-                gameOverListener.onGameOver(mScore);
+                // Trigger game over actions, such as showing a message or resetting the game
+                if (gameOverListener != null) {
+                    gameOverListener.onGameOver(mScore);
+                }
+                mSP.play(mCrashID, 0.4F, 0.4F, 0, 0, 1); // Play death sound
+                mSP.play(mEat_Hard_ID, 1F, 1F, 0, 0, 1); // Play eating sound
             }
-            mSP.play(mCrashID, 0.4F, 0.4F, 0, 0, 1); // Play death sound
-            mSP.play(mEat_Hard_ID, 1F, 1F, 0, 0, 1); // Play eating sound
         }
 
         for (DrawableMovable sword : mSwords) {
@@ -410,11 +401,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         saveHighScore(mScore);
     }
 
-    private void multiplyBombCount() {
-            int currentBombCount = ((Hard) mHard).getBombCount();
-            currentBombCount++;
-            ((Hard) mHard).setBombCount(currentBombCount);
-    }
     // Do all the drawing
     public void draw() {
         // Get a lock on the mCanvas
@@ -453,7 +439,12 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
 
             // Draw the apple and the snake
             mApple.draw(mCanvas, mPaint);
-            mHard.draw(mCanvas, mPaint);
+            //mHard.draw(mCanvas, mPaint);
+            if (mCurrentDifficulty == Difficulty.HARD) {
+                for (int i = 0; i < 3; i++) {
+                    mHard[i].draw(mCanvas, mPaint);
+                }
+            }
             mCoin.draw(mCanvas, mPaint);
             for (DrawableMovable sword : mSwords) {
                 sword.draw(mCanvas, mPaint);
@@ -473,7 +464,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             mSurfaceHolder.unlockCanvasAndPost(mCanvas);
         }
     }
-
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
@@ -508,7 +498,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
         }
     }
 
-
     // Start the thread
     public void resume() {
         newGame(); // Set up the initial game state
@@ -531,8 +520,6 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
     }
 
     // Save high score
-
-
     private void saveHighScore(int newScore) {
         SharedPreferences prefs = getContext().getSharedPreferences("SnakeGamePrefs", MODE_PRIVATE);
         String key = "HighScore_" + mCurrentDifficulty.name();
@@ -545,7 +532,5 @@ class SnakeGame extends SurfaceView implements Runnable, GameControls {
             Log.d("SaveHighScore", "New high score saved for " + key + ": " + newScore);
         }
     }
-
-
 
 }

@@ -12,21 +12,14 @@ import java.util.List;
 import java.util.Random;
 
 public class Hard implements DrawableMovable {
-    private List<Bomb> bombs = new ArrayList<>();
-
-    private int bombCount;
-
     private Point location = new Point();
     private int mSize;
     private Bitmap mBitmapBomb;
-
     private Point mSpawnRange; // Define spawn range for the Bomb
-
+    //keep track the moving direction of the bombs
     private enum Direction {
         UP, DOWN, LEFT, RIGHT
     }
-
-
     private Direction direction;
 
     Hard(Context context, Point sr, int s) {
@@ -48,17 +41,17 @@ public class Hard implements DrawableMovable {
         location.y = random.nextInt(mSpawnRange.y - 1) + 1;
     }
 
-
+    //get the location of the bomb
     public Point getLocation() {
         return location;
     }
 
-
+    //draw the bomb
     public void draw(Canvas canvas, Paint paint) {
         canvas.drawBitmap(mBitmapBomb, location.x * mSize, location.y * mSize, paint);
     }
 
-
+    //check colliding
     public RectF getHitbox() {
         int left = location.x * mSize;
         int top = location.y * mSize;
@@ -66,8 +59,7 @@ public class Hard implements DrawableMovable {
         int height = mBitmapBomb.getHeight();
         return new RectF(left, top, left + width, top + height);
     }
-
-
+    //set the bombs move up,down, right, left
     @Override
     public void move() {
         switch (direction) {
@@ -91,17 +83,10 @@ public class Hard implements DrawableMovable {
 
 
     }
-    public int getBombCount() {
-        return bombs.size(); // Assuming you want to return the number of bombs in the list
-    }
-    public void setBombCount(int count) {
-        this.bombCount = count;
-    }
     private void changeDirectionRandomly() {
         // Change direction randomly
         direction = Direction.values()[new Random().nextInt(Direction.values().length)];
     }
-
 
     @Override
     public void reset() {
